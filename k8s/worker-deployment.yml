@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: worker
+  template:
+    metadata:
+      labels:
+        component: worker
+    spec:
+      containers:
+        - name: worker
+          image: stephengrider/multi-worker
+          # No ports required in these case
+          env:
+            - name: REDIS_HOST
+              # Name of the redis host it has to connect
+              # to. Here, the defined in the Redis Cluster IP
+              value: redis-cluster-ip-service
+            - name: REDIS_PORT
+              # Default port for Redis
+              value: '6379'

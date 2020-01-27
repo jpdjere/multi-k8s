@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-cluster-ip-service
+spec:
+  type: ClusterIP
+  selector:
+    component: redis
+  ports:
+    - port: 6379
+      # And forward traffic to Redis with the 
+      # same port so that it is more simple.
+      targetPort: 6379
