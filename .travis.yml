@@ -1,0 +1,22 @@
+sudo: required # Because we are making use of Docker.
+# We will need to use of Docker, so we require it.
+services:
+  - docker
+before_install:
+  # Steps to carry out from the beggining until just before "Run tests"
+  # 1. Download and install the Google SDK. Everything after the pipe
+  # will install it locally in the instance run by Travis CI
+  - curl https://sdk.cloud.google.com | bash > /dev/null;
+  # Looks at the default directory of Google Cloud SDk, which is by
+  # default $HOME/google-cloud-sdk and it's going to source the file
+  # path.bash.inc, which is config that will modify our shell inside of
+  # TravisCI and we will apply with that source command.
+  - source $HOME/google-cloud-sdk/path.bash.inc
+  # Install kubectl inside our Travis environment
+  - gcloud components update kubectl
+  # Authorization with Google Cloud: "activate-service-account" is the
+  # equivalent to the IAM system. So we provide the set of 
+  # credentials set in that JSON file to it.
+  - gcloud auth activate-service-account --key-file service-account.json
+
+
