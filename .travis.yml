@@ -1,22 +1,58 @@
 sudo: required # Because we are making use of Docker.
-# We will need to use of Docker, so we require it.
 services:
   - docker
+env: 
+  global:
+    # Create the global SHA variable with the latest
+    # commit SHA to be used as image version
+    - SHA=$(git rev-parse HEAD)
+    # Disable Google Cloud SDK user prompts
+    - CLOUDSDK_CORE_DISABLE_PROMPTS=1
 before_install:
   # Steps to carry out from the beggining until just before "Run tests"
-  # 1. Download and install the Google SDK. Everything after the pipe
+  # 1. Unencrypt our service-account file
+  - openssl aes-256-cbc -K $encrypted_0c35eebf403c_key -iv $encrypted_0c35eebf403c_iv -in service-account.json.enc -out service-account.json -d
+  # 2. Download and install the Google SDK. Everything after the pipe
   # will install it locally in the instance run by Travis CI
   - curl https://sdk.cloud.google.com | bash > /dev/null;
-  # Looks at the default directory of Google Cloud SDk, which is by
+  # 3. Looks at the default directory of Google Cloud SDk, which is by
   # default $HOME/google-cloud-sdk and it's going to source the file
   # path.bash.inc, which is config that will modify our shell inside of
   # TravisCI and we will apply with that source command.
   - source $HOME/google-cloud-sdk/path.bash.inc
-  # Install kubectl inside our Travis environment
+  # 4. Install kubectl inside our Travis environment
   - gcloud components update kubectl
-  # Authorization with Google Cloud: "activate-service-account" is the
+  # 5. Authorization with Google Cloud: "activate-service-account" is the
   # equivalent to the IAM system. So we provide the set of 
-  # credentials set in that JSON file to it.
+  # credentials set in that unecrypted JSON file to it.
   - gcloud auth activate-service-account --key-file service-account.json
+  # Tell Google SDK what zone and project we want
+  # to operate in: notice it's the project ID, not name.
+  - gcloud config set project multi-k8s-266418
+  # Select our compute zone (location)
+  - gcloud config set compute/zone us-central1-a
+  # Select our cluster by its name
+  - gcloud container clusters get-credentials multi-cluster
+  
+  ## Prepare to run the tests with Travis
 
+  # Login into Docker. These should be added to Travis env vars
+  # with your Docker Credentials
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --pasword-stdin
+  # Build the image(s) of the projects which have tests that
+  # you want to run. Remeber that these will be temporary
+  # containers what will be destroyed after "before_install".
+  # That's why we are using the Dockerfile.dev file. Also remember
+  # that the last argument is the build context directory
+  - docker build -t jpdjere/react-test -f ./client/Dockerfile.dev ./client
 
+# Actually run the tests:
+script:
+  - docker run -e CI=true jpdjere/docker-react npm run test
+
+# Run the deployment steps with custom script:
+deploy:
+  provider: script
+  script: bash ./deploy.sh
+  on:
+    branch: master
