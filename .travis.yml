@@ -48,7 +48,7 @@ before_install:
 
 # Actually run the tests:
 script:
-  - docker run -e CI=true jpdjeredjian/docker-react npm run test
+  - docker run -e CI=true jpdjeredjian/react-test npm run test
 
 # Run the deployment steps with custom script:
 deploy:
