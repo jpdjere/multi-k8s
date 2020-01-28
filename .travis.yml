@@ -44,11 +44,11 @@ before_install:
   # containers what will be destroyed after "before_install".
   # That's why we are using the Dockerfile.dev file. Also remember
   # that the last argument is the build context directory
-  - docker build -t jpdjere/react-test -f ./client/Dockerfile.dev ./client
+  - docker build -t jpdjeredjian/react-test -f ./client/Dockerfile.dev ./client
 
 # Actually run the tests:
 script:
-  - docker run -e CI=true jpdjere/docker-react npm run test
+  - docker run -e CI=true jpdjeredjian/docker-react npm run test
 
 # Run the deployment steps with custom script:
 deploy:
