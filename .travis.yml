@@ -38,7 +38,7 @@ before_install:
 
   # Login into Docker. These should be added to Travis env vars
   # with your Docker Credentials
-  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --pasword-stdin
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   # Build the image(s) of the projects which have tests that
   # you want to run. Remeber that these will be temporary
   # containers what will be destroyed after "before_install".
